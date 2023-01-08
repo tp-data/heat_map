@@ -6,11 +6,13 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import sys
 
-df = pd.read_csv("sample_team.csv")
-# df = pd.read_csv("sample_revenue_by_date.csv")
+csv = sys.argv[1]
 
-df = df.groupby(['country', 'code']).agg({'value':'sum'}).reset_index()
+df = pd.read_csv(csv)
+
+df = df.groupby(['code']).agg({'value':'sum'}).reset_index()
 
 SHAPEFILE = 'ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp'
 
@@ -27,7 +29,7 @@ geo_df['iso2_code'] = iso2_codes_list # Add the list with iso2 codes to the data
 geo_df = geo_df.drop(geo_df.loc[geo_df['iso2_code'] == 'NULL'].index) # We will drop these countries.
 
 merged_df = pd.merge(left=geo_df, right=df, how='left', left_on='iso2_code', right_on='code') # Merge the two dataframes
-df_merged = merged_df.drop(['country_y', 'code'], axis=1) # Delete some columns that we won't use
+df_merged = merged_df.drop(['code'], axis=1) # Delete some columns that we won't use
 df_merged['value'].fillna(0, inplace=True) #Create the indicator values
 
 # Set up map
